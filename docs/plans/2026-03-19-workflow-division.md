@@ -85,44 +85,50 @@ AGENT_PHONE_NUMBER_ID=
 
 **Focus:** ElevenLabs dashboard configuration + system prompt authoring
 **Tools:** Browser (ElevenLabs dashboard) + 1 Claude Code terminal
+**Build philosophy:** Single working agent FIRST → test on real phone → THEN upgrade to workflows
 
 #### Terminal 1: Claude Code Session (Prompt Drafting)
 
 Use Claude Code to draft, iterate, and refine all system prompts and tool schemas. These get copy-pasted into the ElevenLabs dashboard.
 
-```
-Prompt Claude Code with:
-"I'm building the How Screwed Am I project. Reference
-docs/plans/2026-03-19-howscrewed-design.md section 3.1.
-Help me write production-quality system prompts for each
-subagent phase and the outbound caller agent. Also generate
-the webhook tool API schemas in ElevenLabs format."
-```
+**Write prompts in this priority order:**
 
-**Deliverables from this terminal:**
-- Czara Intake subagent prompt
-- Czara Research subagent prompt
-- Czara Verdict subagent prompt
-- Czara Action subagent prompt
-- Czara Report Back subagent prompt
-- Outbound Caller agent prompt
-- Webhook tool schemas (JSON) for: `firecrawl_extract`, `firecrawl_multi_search`, `trigger_outbound_call`
-- Dynamic variable definitions
+1. **Single unified Czara prompt** — Gets you a working demo immediately. Covers all phases (intake, research, verdict, action, report back) in one prompt. This is the foundation — everything else builds on it.
+2. **Outbound Caller agent prompt** — The differentiator. Write this second so Person B can test the outbound API against it.
+3. **Webhook tool schemas (JSON)** — Person B needs these for backend endpoints. Send ASAP.
+4. **Subagent-split prompts** — Only after single agent is validated. Break the unified prompt into 5 phase-specific prompts for Agent Workflows.
+
+**Hardcode demo scenarios into the system prompt from day one:**
+- Mechanic: Fair price for brake pads + rotors = $580-$750. Common overcharge range = $1,200-$1,800.
+- Landlord: CA Civil Code 1950.5, 21-day return deadline, penalty up to 2x deposit.
+- Salary: Marketing manager Sacramento 4yr exp = $92K-$112K market rate.
+
+These serve as "example research patterns" so Czara sounds great immediately while you iterate on live Firecrawl search quality. The agent should still search live — these are fallback knowledge, not hardcoded responses.
 
 #### Browser: ElevenLabs Dashboard (Agent Configuration)
 
-Work through this checklist in order. Paste prompts from Terminal 1 as you go.
+**Build order: get a working call ASAP, then layer on features.**
 
-**Step 1: Create Czara Agent**
+**Step 1: Voice Selection (20-30 min — this is critical)**
+- [ ] Go to ElevenLabs Voice Library
+- [ ] Browse voices with these criteria: warm, feminine, practical, slight edge/humor
+- [ ] **Test each finalist with BOTH registers:**
+  - Casual: "Hey, I'm Czara. So... how screwed are you?"
+  - Authoritative: "Under Civil Code Section 1950.5, you may be entitled to up to twice the deposit amount."
+- [ ] The voice must nail both. Czara needs to sound like a smart friend AND like someone a landlord takes seriously.
+- [ ] Pick your top voice. Note the voice ID.
+- [ ] **Do NOT rush this.** The voice is the star of the video. Every second of footage features this voice.
+
+**Step 2: Create Czara Agent (Single Agent — NOT workflow yet)**
 - [ ] Go to Agents → Create New Agent
 - [ ] Name: "Czara"
 - [ ] Select LLM: Claude Sonnet 4 (or GPT-4o)
-- [ ] Select Voice: Browse voices, pick warm/feminine/practical tone
-- [ ] Test voice with sample lines: "Hey, I'm Czara. So... how screwed are you?" and "Under Civil Code Section 1950.5, you may be entitled to up to twice the deposit amount."
+- [ ] Assign the voice you selected in Step 1
 - [ ] Set first message: "Hey, I'm Czara. So... how screwed are you?"
-- [ ] Paste system prompt from Terminal 1 (start with Intake prompt for initial testing)
+- [ ] Paste the **unified single-agent prompt** from Terminal 1
+- [ ] Note the `CZARA_AGENT_ID` — send to Person B immediately
 
-**Step 2: Connect Firecrawl MCP Server**
+**Step 3: Connect Firecrawl MCP Server**
 - [ ] Go to Agent → Tools → MCP Servers
 - [ ] Add Custom MCP Server
 - [ ] Name: "Firecrawl Search"
@@ -130,36 +136,30 @@ Work through this checklist in order. Paste prompts from Terminal 1 as you go.
 - [ ] Server URL: `https://mcp.firecrawl.dev/{YOUR_FIRECRAWL_API_KEY}/v2/mcp`
 - [ ] Click Add Integration
 - [ ] Verify search tools appear in the tool list
-- [ ] Test: Ask Czara something that requires a web search
+- [ ] Test in dashboard: Ask Czara something that requires a web search
 
-**Step 3: Import Twilio Phone Number**
+**Step 4: Import Twilio Phone Number**
 - [ ] Go to Phone Numbers tab
 - [ ] Click Import → Twilio
 - [ ] Enter: Label ("How Screwed"), Phone Number, Twilio SID, Twilio Auth Token
 - [ ] Assign Czara agent to the phone number
-- [ ] Test: Call the phone number from your real phone
-- [ ] Verify Czara answers and you can have a conversation
-- [ ] Note the `agent_phone_number_id` for the .env file
+- [ ] Note the `agent_phone_number_id` — send to Person B immediately
 
-**Step 4: Build Agent Workflow**
-- [ ] Go to Agent → Workflows
-- [ ] Create workflow with 5 subagent nodes + edges:
-  ```
-  [Start] → [Intake] → [Research] → [Verdict] → [Action] → [Report Back] → [End]
-                                        ↓
-                                    [End: user declines]
-  ```
-- [ ] Configure each subagent node with its prompt from Terminal 1
-- [ ] Add dispatch tool nodes for Firecrawl Search between Intake → Research
-- [ ] Configure routing: intent-based edges from Intake to Research (when enough details gathered)
-- [ ] Configure routing: conditional edge from Verdict (user says "yes" → Action, "no" → End)
+**⚡ CHECKPOINT: Call Czara from your real phone NOW.**
+- [ ] Call the Twilio number from your real phone
+- [ ] Test the mechanic scenario end-to-end
+- [ ] Listen for: voice quality, latency, search pauses, conversational flow
+- [ ] Note issues. Fix the prompt. Call again. Iterate.
+- [ ] **Do not proceed to Step 5 until a single-agent call feels good.**
 
 **Step 5: Create Outbound Caller Agent**
 - [ ] Create new agent: "Outbound Caller"
 - [ ] Select LLM: Same as Czara
 - [ ] Select Voice: Professional, firm, confident (noticeably different from Czara)
+  - [ ] Test with: "Hi, I'm calling to get a quote for front and rear brake pads and rotors on a 2019 Toyota Camry."
+  - [ ] Test with: "I'm calling regarding the security deposit for 1234 Oak Street. Under California Civil Code 1950.5..."
 - [ ] Paste outbound system prompt from Terminal 1
-- [ ] Note the `OUTBOUND_AGENT_ID`
+- [ ] Note the `OUTBOUND_AGENT_ID` — send to Person B immediately
 
 **Step 6: Configure Agent Transfer**
 - [ ] On Czara agent → Tools → System Tools
@@ -170,7 +170,22 @@ Work through this checklist in order. Paste prompts from Terminal 1 as you go.
   - Transfer message: "Alright, I'm connecting you now..."
   - Enable transferred agent first message: Yes
 
-**Step 7: Add Webhook Tools** (after Person B deploys backend)
+**Step 7: Upgrade to Agent Workflows (ONLY after single agent is solid)**
+- [ ] Go to Agent → Workflows
+- [ ] Create workflow with 5 subagent nodes + edges:
+  ```
+  [Start] → [Intake] → [Research] → [Verdict] → [Action] → [Report Back] → [End]
+                                        ↓
+                                    [End: user declines]
+  ```
+- [ ] Replace unified prompt with phase-specific subagent prompts from Terminal 1
+- [ ] Add dispatch tool nodes for Firecrawl Search between Intake → Research
+- [ ] Configure routing: intent-based edges from Intake to Research (when enough details gathered)
+- [ ] Configure routing: conditional edge from Verdict (user says "yes" → Action, "no" → End)
+- [ ] **Test the full workflow via phone call. Compare to single-agent experience.**
+- [ ] If workflows feel worse or buggy, revert to single agent. The single agent IS the fallback AND the production-ready option.
+
+**Step 8: Add Webhook Tools** (after Person B deploys backend)
 - [ ] Add webhook tool: `firecrawl_extract`
   - URL: `{BACKEND_URL}/api/firecrawl-extract`
   - Method: POST
@@ -184,7 +199,7 @@ Work through this checklist in order. Paste prompts from Terminal 1 as you go.
   - Method: POST
   - Request body schema from Terminal 1
 
-**Step 7 is blocked on Person B's backend deployment URL.** Do steps 1-6 first, step 7 when URL is available.
+**Step 8 is blocked on Person B's backend deployment URL.** Do steps 1-7 first, step 8 when URL is available.
 
 ---
 
