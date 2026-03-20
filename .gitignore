@@ -27,3 +27,4 @@ build/
 
 # Railway
 .railway/
+.claude/
