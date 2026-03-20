@@ -1,0 +1,95 @@
+{
+  "tools": [
+    {
+      "name": "firecrawl_extract",
+      "description": "Extract structured data (phone numbers, prices, addresses, ratings) from specific web pages. Use this when you need clean, structured information from a known URL — for example, extracting a business phone number and price range from an auto shop's website, or extracting statute details from a legal page.",
+      "type": "webhook",
+      "api_schema": {
+        "url": "{{BACKEND_URL}}/api/firecrawl-extract",
+        "method": "POST",
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "urls": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of URLs to extract data from. Can include wildcards like 'example.com/*'."
+            },
+            "schema_definition": {
+              "type": "object",
+              "description": "JSON Schema defining the structure of data to extract. Example: {\"type\":\"object\",\"properties\":{\"phone\":{\"type\":\"string\"},\"price_range\":{\"type\":\"string\"}}}"
+            },
+            "prompt": {
+              "type": "string",
+              "description": "Natural language description of what to extract. Example: 'Extract the business phone number, address, and price range for brake repairs.'"
+            }
+          },
+          "required": ["urls", "schema_definition", "prompt"]
+        }
+      },
+      "response_timeout_secs": 30
+    },
+    {
+      "name": "firecrawl_multi_search",
+      "description": "Run multiple web searches in parallel and get combined results. Use this to build a comprehensive picture by searching for different aspects simultaneously — for example, searching for fair prices, applicable laws, and competitor businesses all at once.",
+      "type": "webhook",
+      "api_schema": {
+        "url": "{{BACKEND_URL}}/api/firecrawl-multi-search",
+        "method": "POST",
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "queries": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Array of search queries to run in parallel. Example: ['2019 Toyota Camry brake cost', 'auto shops near Sacramento reviews', 'Toyota Camry brake recall NHTSA']"
+            },
+            "location": {
+              "type": "string",
+              "description": "Geographic location for search results. Example: 'Sacramento, California'"
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results per search query. Default: 3"
+            }
+          },
+          "required": ["queries"]
+        }
+      },
+      "response_timeout_secs": 30
+    },
+    {
+      "name": "trigger_outbound_call",
+      "description": "Initiate a real outbound phone call on behalf of the user. The outbound agent will call the specified phone number with the research data and objective you provide. Use this when the user confirms they want you to make a call — for example, calling mechanic shops for quotes or calling a landlord about a deposit.",
+      "type": "webhook",
+      "api_schema": {
+        "url": "{{BACKEND_URL}}/api/trigger-outbound-call",
+        "method": "POST",
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "target_phone": {
+              "type": "string",
+              "description": "Phone number to call in E.164 format. Example: '+19165551234'"
+            },
+            "research_context": {
+              "type": "string",
+              "description": "Summary of all research findings to give the outbound agent as context. Include fair prices, statutes, penalties, deadlines — everything the agent needs as leverage."
+            },
+            "objective": {
+              "type": "string",
+              "description": "What the outbound agent should accomplish. Example: 'Get a quote for front and rear brake pads and rotors on a 2019 Toyota Camry' or 'Inform the landlord about Civil Code 1950.5 violation and request deposit return.'"
+            },
+            "scenario_type": {
+              "type": "string",
+              "enum": ["mechanic", "landlord", "salary", "medical", "general"],
+              "description": "Type of scenario — determines the outbound agent's tone and approach."
+            }
+          },
+          "required": ["target_phone", "research_context", "objective", "scenario_type"]
+        }
+      },
+      "response_timeout_secs": 30
+    }
+  ]
+}
