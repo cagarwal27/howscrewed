@@ -85,10 +85,8 @@ async def firecrawl_extract(req: ExtractRequest):
     try:
         result = fc.extract(
             urls=req.urls,
-            params={
-                "prompt": req.prompt,
-                "schema": req.schema_definition,
-            },
+            prompt=req.prompt,
+            schema=req.schema_definition,
         )
         return {"success": True, "data": result}
     except Exception as e:
@@ -107,14 +105,23 @@ async def firecrawl_multi_search(req: MultiSearchRequest):
 
     async def search_one(query: str) -> dict:
         try:
-            params = {
-                "limit": req.limit,
-                "scrapeOptions": {"formats": ["markdown"]},
-            }
-            if req.location:
-                params["location"] = req.location
-            result = fc.search(query=query, params=params)
-            return {"query": query, "success": True, "results": result}
+            result = fc.search(
+                query=query,
+                limit=req.limit,
+                scrape_options={"formats": ["markdown"]},
+                location=req.location,
+            )
+            # Convert SearchData to serializable format
+            items = []
+            if hasattr(result, "web") and result.web:
+                for r in result.web:
+                    items.append({
+                        "title": getattr(r, "title", ""),
+                        "url": getattr(r, "url", ""),
+                        "description": getattr(r, "description", ""),
+                        "markdown": getattr(r, "markdown", ""),
+                    })
+            return {"query": query, "success": True, "results": items}
         except Exception as e:
             return {"query": query, "success": False, "error": str(e)}
 
