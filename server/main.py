@@ -26,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+if os.path.isdir("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # In-memory store for outbound call results (sufficient for hackathon)
 call_results: dict[str, dict] = {}
