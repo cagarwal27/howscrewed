@@ -1,0 +1,171 @@
+/* ============================================
+   How Screwed Am I? — Custom Styles
+   Tailwind CDN handles layout/spacing/colors.
+   This file handles animations, gradients, and
+   effects that require custom CSS.
+   ============================================ */
+
+/* ------------------------------------------
+   1. Base
+   ------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0A0A0A;
+}
+
+/* ------------------------------------------
+   2. Gradient Text
+   Used on "Am I?" in the hero title.
+   ------------------------------------------ */
+
+.gradient-text {
+  background: linear-gradient(135deg, #FF3B30 0%, #FF6B6B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ------------------------------------------
+   3. Hero Entrance Animation
+   Staggered fade-in + slide-up for hero
+   children. Auto-plays on page load.
+   ------------------------------------------ */
+
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content > * {
+  opacity: 0;
+  animation: hero-fade-in 0.6s ease-out forwards;
+}
+
+.hero-content > *:nth-child(1) { animation-delay: 0.0s; }
+.hero-content > *:nth-child(2) { animation-delay: 0.1s; }
+.hero-content > *:nth-child(3) { animation-delay: 0.2s; }
+.hero-content > *:nth-child(4) { animation-delay: 0.3s; }
+.hero-content > *:nth-child(5) { animation-delay: 0.4s; }
+
+/* ------------------------------------------
+   4. Card Hover Effect
+   Lift + red shadow on hover for scenario
+   cards and other interactive cards.
+   ------------------------------------------ */
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(255, 59, 48, 0.15);
+}
+
+/* ------------------------------------------
+   5. Pulse Ring (CTA Button)
+   Pulsing red ring around the primary CTA.
+   ------------------------------------------ */
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); }
+  70%  { box-shadow: 0 0 0 15px rgba(255, 59, 48, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+}
+
+/* ------------------------------------------
+   6. Scroll Reveal
+   Elements start hidden, JS adds .visible
+   via IntersectionObserver.
+   ------------------------------------------ */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ------------------------------------------
+   7. Hero Background Glow
+   Subtle red radial gradient behind the
+   hero title for depth.
+   ------------------------------------------ */
+
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255, 59, 48, 0.08) 0%, transparent 70%);
+}
+
+/* ------------------------------------------
+   8. Money Counter Green Glow
+   Subtle green radial gradient behind the
+   $24,560 counter.
+   ------------------------------------------ */
+
+.money-counter-section {
+  position: relative;
+}
+
+.money-counter-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(52, 199, 89, 0.08) 0%, transparent 70%);
+}
+
+/* ------------------------------------------
+   9. Widget Section Separator
+   Horizontal gradient line at the top of the
+   widget section. Brand red fading to
+   transparent on both sides.
+   ------------------------------------------ */
+
+.widget-glow {
+  position: relative;
+}
+
+.widget-glow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #FF3B30 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ------------------------------------------
+   10. Counter Animation
+   Optional visual treatment during the
+   count-up animation.
+   ------------------------------------------ */
+
+.counter-animate {
+  transition: color 0.3s ease;
+}
