@@ -90,6 +90,26 @@
         }
       },
       "response_timeout_secs": 30
+    },
+    {
+      "name": "get_call_result",
+      "description": "Check the result of an outbound call you previously triggered. Use this after trigger_outbound_call to find out what happened — quotes received, commitments made, who was spoken to. If status is 'pending', the call is still in progress — wait a moment and try again.",
+      "type": "webhook",
+      "api_schema": {
+        "url": "{{BACKEND_URL}}/api/get-call-result",
+        "method": "POST",
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "description": "The conversation_id returned by trigger_outbound_call."
+            }
+          },
+          "required": ["conversation_id"]
+        }
+      },
+      "response_timeout_secs": 30
     }
   ]
 }

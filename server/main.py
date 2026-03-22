@@ -219,6 +219,18 @@ async def get_call_result(conversation_id: str):
     return {"success": True, "data": call_results[conversation_id]}
 
 
+class GetCallResultRequest(BaseModel):
+    conversation_id: str
+
+
+@app.post("/api/get-call-result")
+async def get_call_result_post(req: GetCallResultRequest):
+    """Retrieve the result of a completed outbound call (POST version for webhook tools)."""
+    if req.conversation_id not in call_results:
+        return {"success": True, "status": "pending", "data": None}
+    return {"success": True, "status": "completed", "data": call_results[req.conversation_id]}
+
+
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
 

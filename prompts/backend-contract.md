@@ -265,12 +265,47 @@ Webhook for outbound call completion. Called by the outbound agent system when a
 
 ### GET /api/call-result/{conversation_id}
 
-Retrieve the result of a completed outbound call.
+Retrieve the result of a completed outbound call (direct API use).
 
 **Response:**
 ```json
 {
   "success": true,
+  "data": {
+    "result": "Joe's Auto quoted $640...",
+    "transcript": "...",
+    "completed_at": "2026-03-19T19:30:00"
+  }
+}
+```
+
+---
+
+### POST /api/get-call-result
+
+Retrieve the result of a completed outbound call (webhook tool version). Returns `"status": "pending"` if the call is still in progress, `"status": "completed"` if results are available.
+
+**Request:**
+```json
+{
+  "conversation_id": "conv_abc123"
+}
+```
+
+**Response (pending):**
+```json
+{
+  "success": true,
+  "status": "pending",
+  "data": null
+}
+```
+
+**Response (completed):**
+```json
+{
+  "success": true,
+  "status": "completed",
   "data": {
     "result": "Joe's Auto quoted $640...",
     "transcript": "...",
